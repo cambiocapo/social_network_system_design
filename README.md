@@ -26,16 +26,46 @@
 - Followers: keep list of followees 3M(0.000004Mb) and followers 3M(0.000004Mb)  
 - Feed: keep list of posts 200(0.000008Mb) for each user
 
-# System requires to keep:
+# System requires to keep (deadweight):
  - user's profile: (2Mb + 0.5Mb + 0.01Mb)*10M ≈ 24Tb + (20% year growth) ≈ 5Tb
- - followers: (0.000004Mb*3M)*500K ≈ 6Tb max, in reality much smaller  
- - followee: (0.000004Mb*3M)*500K ≈ 6Tb max, in reality much smaller
+ - followers: (0.000004Mb*500)*10M ≈ 20Gb max, in reality much smaller  
+ - followee: (0.000004Mb*500)*10M ≈ 20Gb max, in reality much smaller
+ - 1% super popular user with 1M followers +≈ 1Tb
  - feed: (0.000008Mb*200)*10M ≈ 0.015Tb (renew at some interval, doesn't require new space each time)
 # Expected DAU is 4M suppose that 500K create posts and leave comments:
  - posts (2Mb + 0.1Mb + 0.000005Mb)*500K ≈ 1Tb
  - comments (0,00015Mb * 50)*500K ≈ 0.0036Tb
  - reactions: (0.000004Mb*3)*500K ≈ 0.000002Tb
 
-# RPS: 
+# Traffic: 
  - write: 1Tb + 0.0036Tb + 0.000002Tb ≈ 1.004Tb/day 
- - read: 8 * read ≈ 8.03Tb/day 
+ - read: 8 * write ≈ 8.03Tb/day 
+
+# RPS:
+ - write: 1post\*500K + 50comments\*500K + 3reactions\*500K + 2subscribe\*500K = 28000event/day / 86400 ≈ 330 
+ - read: 8 * write ≈ 2600
+
+# Storage space required:
+  ## HDD:  
+    ### Capacity:
+        - write + read + deadweight ≈ (1.004+8.03)Tb/day * 365 + (5+1)Tb ≈ 3.3Pb    -> 105 Discs
+    ### IOPS:
+        - approximately RPS(read+write): 330 + 2600 ≈ 3000                          -> 30 Disc
+    ### Thoughput: 
+        - (1.004+8.03)Tb/day ≈ 9040000 / 86400 ≈ 105Mb/s                            -> 1 Disc
+
+  ## SSD(SATA):  
+    ### Capacity:
+        - write + read + deadweight ≈ (1.004+8.03)Tb/day * 365 + (5+1)Tb ≈ 3.3Pb    -> 4 Discs
+    ### IOPS:
+        - approximately RPS(read+write): 330 + 2600 ≈ 3000                          -> 3 Disc
+    ### Thoughput: 
+        - (1.004+8.03)Tb/day ≈ 9040000 / 86400 ≈ 105Mb/s                            -> 1 Disc
+    
+  ## SSD(nVME):  
+    ### Capacity:
+        - write + read + deadweight ≈ (1.004+8.03)Tb/day * 365 + (5+1)Tb ≈ 3.3Pb    -> 110 Discs
+    ### IOPS:
+        - approximately RPS(read+write): 330 + 2600 ≈ 3000                          -> 1 Disc
+    ### Thoughput: 
+        - (1.004+8.03)Tb/day ≈ 9040000 / 86400 ≈ 105Mb/s                            -> 1 Disc

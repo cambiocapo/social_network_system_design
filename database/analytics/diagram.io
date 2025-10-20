@@ -9,3 +9,13 @@ Table analytics {
   reaction_type varchar
   comment text  
 }
+
+
+// Replication:
+// - master-slave replication type
+// - asynchronous replication 
+// - replication factor 3
+
+// Sharding:
+// - horizontal key based Sharding
+// - 3 shards

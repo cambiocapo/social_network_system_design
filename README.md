@@ -33,9 +33,9 @@
  - 1% super popular user with 1M followers +≈ 1Tb
  - feed: (0.000008Mb*200)*10M ≈ 0.015Tb (renew at some interval, doesn't require new space each time)
 # Expected DAU is 4M suppose that 500K create posts and leave comments:
- - posts (2Mb + 0.1Mb + 0.000005Mb)*500K ≈ 1Tb
- - comments (0,00015Mb * 50)*500K ≈ 0.0036Tb
- - reactions: (0.000004Mb*3)*500K ≈ 0.000002Tb
+ - posts (2Mb + 0.1Mb + 0.000005Mb)\*500K ≈ 1Tb
+ - comments (0,00015Mb \* 50)\*500K ≈ 0.0036Tb
+ - reactions: (0.000004Mb\*3)\*500K ≈ 0.000002Tb
 
 # Traffic: 
  - write: 1Tb + 0.0036Tb + 0.000002Tb ≈ 1.004Tb/day 
@@ -69,3 +69,65 @@
         - approximately RPS(read+write): 330 + 2600 ≈ 3000                          -> 1 Disc
     ### Thoughput: 
         - (1.004+8.03)Tb/day ≈ 9040000 / 86400 ≈ 105Mb/s                            -> 1 Disc
+
+# Distributed storage of data:
+    ## Replication:
+        - Eventual consistency is enough in case of our requirements. 
+        - Master-slave replication with asynchronous copy
+
+    ## Sharding:
+        - Database dependent sharding strategy
+
+    ## Cache:
+        - Each shard has it's own cache 
+        - Cache strategy is cache-aside
+        - Cache update is LRU
+
+# Hosts:
+    ## Interactions:
+        write:
+            - posts (2Mb + 0.1Mb + 0.000005Mb)\*500K ≈ 1Tb
+            - comments (0,00015Mb \* 50)\*500K ≈ 0.0036Tb
+            - reactions: (0.000004Mb\*3)\*500K ≈ 0.000002Tb
+        read:
+            - posts (2Mb + 0.1Mb + 0.000005Mb)\*4M ≈ 8.2Tb
+            - comments (0,00015Mb \* 50)\*4M ≈ 0.03Tb
+            - reactions: (0.000004Mb\*3)\*4M ≈ 0.00005Tb
+        read+write:
+            - posts 1Tb + 8.2Tb ≈ 9.2Tb 
+            - comments 0.0036Tb + 0.03Tb ≈ 0.04Tb
+            - reactions 0.000002Tb + 0.00005Tb ≈ 0.00006Tb
+        static_data(deadweight):
+            - user_profiles 5Tb
+            - followers 1Tb
+        overall:
+            - posts         9.2Tb       |           |  3.4Pb    ->  104 HDD  
+            - comments      0.04Tb      |  * 365 ≈  |  15Tb     ->    1 HDD
+            - reactions     0.00006Tb   |           |  0.02Tb   ->    1 HDD
+            - user_profiles 5Tb                        5Tb      ->    1 HDD
+            - followers     1Tb                        1Tb      ->    1 HDD
+
+    ## Storage:
+        ### posts:
+            - 104HDD
+            - hosts:
+                3 shards (RAID5 + replication factor 3) = (104 / 3) * 3 * 1.2 =     157
+                RAID5 reduces capacity by 20%
+        ### comments:
+            - 1 HDD
+            - hosts:
+                2 shards (RAID5 + replication factor 3) = (1/2) * 3 * 1.2 =         2 
+        ### reactions:
+            - 1 HDD
+            - hosts:
+                2 shards (RAID5 + replication factor 3) = (1/2) * 3 * 1.2 =         2
+        ### user_profiles:
+            - 1 HDD
+            - hosts:
+                RAID5 + replication factor 3 = 1 * 3 * 1.2 =                        4 
+        ### followers:
+            - 1 HDD
+            - hosts:
+                RAID5 + replication factor 3 = 1 * 3 * 1.2 =                        4
+
+        Overall hosts: 157 + 2 + 2 + 4 + 4 = 169

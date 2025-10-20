@@ -37,3 +37,19 @@ Ref: users.id < follows.followee_user_id
 Ref: users.id < follows.followed_user_id
 Ref: posts.id < reactions.post_id
 Ref: users.id < reactions.user_id
+
+
+
+// Replication:
+// - master-slave replication type
+// - asynchronous replication 
+// - replication factor 3
+
+// Sharding:
+// - horizontal key based Sharding
+// - 2 shards
+
+// Cache:
+// - 10000 post_id a located in Cache
+// - Least recent quired post_id replaced at each new query
+ 

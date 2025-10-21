@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+' !include C4_Context.puml
+
+LAYOUT_AS_SKETCH()
+
+title System Context diagram for Travellers social network
+
+Person(user, "User", "User has personal account, can create posts, connect with other users, react on other users posts.")
+System(TSN, "Travellers social network", "Allows users share own content about their travels and consume content of the other users")
+
+System_Ext(analytics, "Analytical system", "Have access to all information about users and their interactions, analyse available data and provide valuable insights for business")
+System_Ext(monitoring, "Services monitoring system", "Provides collection, analysis and presentation of key metrics of the system performance")
+
+Rel(user, TSN, "Uses")
+Rel(TSN, analytics, "Collect data")
+Rel(TSN, monitoring, "Collect data")
+@enduml

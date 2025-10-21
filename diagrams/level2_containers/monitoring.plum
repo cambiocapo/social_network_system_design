@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+' !include C4_Container.puml
+
+LAYOUT_AS_SKETCH()
+
+title Container diagram for Monitoring System
+
+System(tsn, Travellers Social Network, "Core System")
+
+Container(dashboard, Metrics dashboard, "Shows all collected metrics in a handful form")
+
+System_Boundary(bound, "Monitoring System") {
+    ContainerDb(database, "Database", "SQL database", "Stores data necessary for monitoring purposes: CPU/GPU/RAM/Disks loading/speed/usage/peaks, system logs, fault/errors/undefined behavior,... ")
+    Container(backend_api, "API Application", "Prometeus+Grafana", "Contains all logic of information collection, processing and representation")
+}
+
+Rel_Back_Neighbor(database, backend_api, "Reads from and writes to", "async")
+Rel_Neighbor(tsn, backend_api, "Collect data", "RPC")
+Rel(backend_api, dashboard, "Outputs")
+@enduml

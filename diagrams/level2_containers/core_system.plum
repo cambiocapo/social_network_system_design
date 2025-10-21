@@ -1,0 +1,41 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+' uncomment the following line and comment the first to use locally
+' !include C4_Container.puml
+
+LAYOUT_AS_SKETCH()
+
+title Container diagram for Travellers Social Network
+
+Person(user, User, "User has own profile, can create posts, interact with other users, watch other users posts and react on them")
+
+Container(web, Web application, "Web application provides full functionality of the system, work on PC")
+Container(mobile, Mobile Application, "Mobile application provides key features, necessary for smooth user experience on mobile devices")
+
+Container(api_gateway, API Gateway, "Api gateway provides Authentication, authorization, rate limiting, throttling, request/response transformation, caching and routing")
+
+Container(load_bal, Load balancer, "Load balancer ensures that traffic distributes equally amongst clusters")
+
+System_Boundary(bound, "Travellers Social System") {
+
+    ContainerDb(db_shard_N, "DB_shard_N", "SQL Database", "Stores information about users, posts, users connections, reactions, events cronological information")
+    ContainerDb(registrator, "Service registration", "Zookeeper", "Provides registration and routing for all services in the system")
+    Container(backend_api, "API Application", "Docker Container", "Provides main logic of the system functionality")
+}
+
+System_Ext(analytics, "Analytical system", "Analytics system collect data from TSN, analyse it and provides valuable information")
+System_Ext(monitoring, "Monitoring system", "Collect all information about system, analyse it and provides key metrics about system performance in appropriate form")
+
+Rel(user, web, "Uses", "HTTPS")
+Rel(user, mobile, "Uses", "HTTPS")
+Rel(web, api_gateway, "Uses", "TCP")
+Rel(mobile, api_gateway, "Uses", "TCP")
+Rel(api_gateway, load_bal, "Uses", "TCP")
+Rel(load_bal, backend_api, "Uses", "TCP")
+
+Rel_Back_Neighbor(registrator, backend_api, "Reads from and writes to", "async")
+Rel_Back_Neighbor(db_shard_N, registrator, "Reads from and writes to", "async")
+
+Rel_Back(analytics, backend_api, "Collect data", "async, RPC")
+Rel_Neighbor(backend_api, monitoring, "Collect data", "async, RPC")
+@enduml

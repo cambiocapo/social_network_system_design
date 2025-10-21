@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+' !include C4_Container.puml
+
+LAYOUT_AS_SKETCH()
+
+title Container diagram for Analytical System
+
+Person(user, Engineer, "Uses data from the system to analyse it and use outputs to influence users behavior as for the business requirements")
+
+System(tsn, Travellers Social Network, "Core System")
+
+System_Boundary(bound, "Analytical System") {
+    ContainerDb(db_shard_N, "DB_shard_N", "Clickhouse DB", "Stores data necessary for analytical purposes: post_id, user_id, users interactions with posts, users reactions, users connections,...")
+    ContainerDb(registrator, "Service registration", "Zookeeper", "Provides registration and routing for all services in the system")
+    Container(backend_api, "API Application", "Python", "Contains all logic of information collection, processing/preparing for analytical tasks")
+}
+
+Rel(user, backend_api, "Uses", "RPC")
+
+Rel_Back_Neighbor(registrator, backend_api, "Reads from and writes to", "async")
+Rel_Back_Neighbor(db_shard_N, registrator, "Reads from and writes to", "async")
+
+Rel_Neighbor(tsn, backend_api, "Collect data", "RPC")
+@enduml
